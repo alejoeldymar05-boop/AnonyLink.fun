@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AnonyLink.fun — anonymous messages</title>
+  <meta name="description" content="Create a short anonymous message link. Receive honest messages from friends and followers." />
+  <meta property="og:title" content="AnonyLink.fun" />
+  <meta property="og:description" content="Create a short anonymous message link. Receive honest messages from friends and followers." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="site-header">
+      <a class="brand" href="#/">AnonyLink.fun</a>
+      <nav>
+        <a href="#/about">About</a>
+        <a href="#/faq">FAQ</a>
+        <a href="#/support">Support</a>
+        <a href="#/terms">Terms</a>
+        <a href="#/privacy">Privacy</a>
+      </nav>
+    </header>
+
+    <main id="view" class="container"></main>
+
+    <footer class="site-footer">
+      <div>© <span id="year"></span> AnonyLink.fun — Built for demo. Not for production use without a backend.</div>
+      <div class="small">Demo mode: messages persist only in your browser unless a backend is configured.</div>
+    </footer>
+  </div>
+
+  <template id="home-tpl">
+    <section class="hero">
+      <h1>Create your anonymous link</h1>
+      <p class="lead">Get honest anonymous messages from friends, followers, or classmates. Mobile-first, simple, and privacy-conscious.</p>
+
+      <div class="card create">
+        <label for="slug">Choose a short link</label>
+        <div class="row">
+          <input id="slug" placeholder="yourname (only letters, numbers, - or _)" />
+          <button id="createBtn">Create</button>
+        </div>
+        <div class="helper">Profile slug becomes: <code id="previewLink">#</code></div>
+      </div>
+
+      <div class="card sample">
+        <h3>Try a sample profile</h3>
+        <div class="sample-profiles" id="sampleProfiles"></div>
+      </div>
+
+      <div class="card note">
+        <strong>Note:</strong> This demo stores new messages in your browser using <code>localStorage</code>. To make messages global and persistent across devices you'll need to add a backend (Supabase, Firebase, or serverless endpoint). See README for instructions.
+      </div>
+    </section>
+  </template>
+
+  <template id="profile-tpl">
+    <section class="profile">
+      <div class="profile-head card">
+        <div class="profile-avatar" id="profileAvatar"></div>
+        <div>
+          <h2 id="profileName"></h2>
+          <div class="muted">Share this link:</div>
+          <div class="link-row">
+            <input id="shareLink" readonly />
+            <button id="copyBtn">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card send">
+        <h3>Send an anonymous message</h3>
+        <textarea id="msgText" placeholder="Write your message..."></textarea>
+        <div class="row between">
+          <div class="muted" id="charCount">0 / 400</div>
+          <div>
+            <select id="msgCategory">
+              <option value="">Category (optional)</option>
+              <option value="question">Question</option>
+              <option value="compliment">Compliment</option>
+              <option value="advice">Advice</option>
+            </select>
+            <button id="sendBtn">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card messages">
+        <h3>Messages</h3>
+        <div id="messagesList"></div>
+      </div>
+
+      <div class="card owner">
+        <h4>Owner tools</h4>
+        <p class="muted">To moderate your profile, append <code>?owner=YOUR_OWNER_KEY</code> to the profile URL (client-only secret included in seed). Owner view only works in this demo if the secret matches the seeded profile secret or localStorage owner key.</p>
+        <div class="row">
+          <input id="ownerKey" placeholder="Paste owner key or leave blank" />
+          <button id="enterOwnerBtn">Enter Owner View</button>
+        </div>
+        <div class="helper">If owner key is valid you'll see delete and export options for messages.</div>
+      </div>
+    </section>
+  </template>
+
+  <template id="about-tpl">
+    <section class="card longpage">
+      <h2>About AnonyLink.fun</h2>
+      <p>AnonyLink.fun is a lightweight demo of an anonymous messaging link service. It is built as a static single-page application with a seeded, embedded database. The intent is to provide a simple prototype you can publish on GitHub Pages and later connect to a backend for persistent, global messages.</p>
+
+      <h3>Why this exists</h3>
+      <p>Anonymous feedback is useful for honest opinions, Q&A, or compliments. This demo intentionally limits data collection and stores new messages locally to avoid storing user IPs or creating an abuse vector without a proper backend.</p>
+
+      <h3>How it works</h3>
+      <ol>
+        <li>Create a slug (short link) on the home page or use a seeded profile.</li>
+        <li>Share the profile link with others.</li>
+        <li>Visitors can send anonymous messages via the message form. In demo mode messages are saved to the visitor's browser (localStorage) and merged with seeded messages.</li>
+      </ol>
+
+      <h3>Want production?</h3>
+      <p>To make this production-ready, add a backend (Supabase HTTP endpoints or serverless functions) with rate-limiting, spam filtering, CAPTCHA, abuse reporting, and a retention policy. See README for steps.</p>
+    </section>
+  </template>
+
+  <template id="faq-tpl">
+    <section class="card longpage">
+      <h2>Frequently Asked Questions (FAQ)</h2>
+      <h4>Q: Will messages be truly anonymous?</h4>
+      <p>A: In this demo, messages are anonymous and new messages are stored in your browser. The app does not collect IP addresses or any identifying metadata in the demo. For a backend-enabled version you must implement a privacy policy and carefully manage metadata.</p>
+
+      <h4>Q: How do I moderate messages?</h4>
+      <p>A: Owner moderation uses a per-profile owner key for demo purposes. If you operate a backend, implement owner authentication or email verification for secure moderation.</p>
+
+      <h4>Q: Can people abuse this for harassment?</h4>
+      <p>A: Anonymous systems can be abused. For production, add content moderation, report flows, blocklists, and rate-limiting. See the Terms and Abuse sections below.</p>
+
+      <h4>Q: How do I export my messages?</h4>
+      <p>A: In owner view there is an Export button that downloads a JSON file of messages. In demo mode this exports localStorage + seeded messages for that browser.</p>
+    </section>
+  </template>
+
+  <template id="support-tpl">
+    <section class="card longpage">
+      <h2>Support & Contact</h2>
+      <p>If you need help setting up the site, connecting a backend, or removing demo mode, contact the operator at <strong>support@anonyLink.fun</strong> (demo).</p>
+      <h3>Self-help</h3>
+      <ul>
+        <li>Publishing: Use GitHub Pages — push repo and enable Pages in repo settings.</li>
+        <li>Custom domain: Create a CNAME file with your domain and configure DNS A/CNAME records per GitHub Pages docs.</li>
+        <li>Switching to Supabase: See README instructions for an example schema and API endpoint mapping.</li>
+      </ul>
+
+      <h3>Report abuse</h3>
+      <p>To report abusive messages or request takedown: email <strong>abuse@anonyLink.fun</strong> with the profile slug, sample message (if available), and date/time. We'll respond as soon as possible.</p>
+    </section>
+  </template>
+
+  <template id="terms-tpl">
+    <section class="card longpage">
+      <h2>Terms of Service</h2>
+      <p>Last updated: <strong>October 22, 2025</strong></p>
+
+      <h3>1. Acceptance</h3>
+      <p>By using AnonyLink.fun you accept these Terms of Service (Terms). If you do not agree, do not use the Service.</p>
+
+      <h3>2. Service description</h3>
+      <p>AnonyLink.fun is a static demo website that allows creation of profile links for receiving anonymous messages. In demo mode, new messages persist only in the submitter's browser storage unless you configure a backend.</p>
+
+      <h3>3. Eligibility</h3>
+      <p>You must be at least 13 years old to use this Service. If you are under 18 you must have parental consent.</p>
+
+      <h3>4. User responsibilities</h3>
+      <p>Users must not use the Service to transmit illegal content, harass others, threaten, impersonate, spam, or infringe on others' rights. You must not attempt to access, interfere with, or damage the Service.</p>
+
+      <h3>5. Moderation & abuse</h3>
+      <p>We reserve the right to remove content or disable profiles that violate the Terms or applicable laws. In demo mode content moderation is limited — for full moderation use a backend and implement moderation policies.</p>
+
+      <h3>6. Data & privacy</h3>
+      <p>See our Privacy Policy for details on data handling. In demo mode we do not collect IPs or identifying metadata by default.</p>
+
+      <h3>7. Limitation of liability</h3>
+      <p>The Service is provided "as-is" and "as-available." To the fullest extent permitted by law, AnonyLink.fun and its operators disclaim all warranties and will not be liable for damages arising from use of the Service.</p>
+
+      <h3>8. Governing law</h3>
+      <p>These Terms are governed by the laws of the jurisdiction of the site operator. For the demo, assume the operator's default jurisdiction unless configured otherwise.</p>
+
+      <h3>9. Changes</h3>
+      <p>We may revise these Terms from time to time. Continued use after changes constitutes acceptance.</p>
+
+      <h3>10. Contact</h3>
+      <p>Contact: <strong>support@anonyLink.fun</strong></p>
+    </section>
+  </template>
+
+  <template id="privacy-tpl">
+    <section class="card longpage">
+      <h2>Privacy Policy</h2>
+      <p>Last updated: <strong>October 22, 2025</strong></p>
+
+      <h3>Introduction</h3>
+      <p>AnonyLink.fun values privacy. This policy explains what information we collect, how we use it, and your rights.</p>
+
+      <h3>Information we collect</h3>
+      <ul>
+        <li><strong>Demo mode:</strong> No IPs or identifying metadata are collected by default. Messages submitted in demo are stored in your browser's localStorage.</li>
+        <li><strong>Seeded data:</strong> The static `data.js` contains sample profiles and example messages. Do not include real personal data in seeded content unless you intend it to be public.</li>
+      </ul>
+
+      <h3>How we use information</h3>
+      <p>In demo mode, no server-side processing occurs. If you enable a backend, you should define a retention policy, secure the storage, and only collect necessary metadata.</p>
+
+      <h3>Third-party services</h3>
+      <p>If you connect third-party services (Supabase, Firebase, CAPTCHA providers) those services' privacy policies apply. Ensure configuration follows local law (for example, Philippines law if operating there).</p>
+
+      <h3>Data retention</h3>
+      <p>In demo mode messages are stored in the browser and persist until cleared. For production, implement retention and deletion options and publish them here.</p>
+
+      <h3>User rights</h3>
+      <p>If you run a production instance, provide mechanisms for users to request data deletion or to opt-out of data collection.</p>
+
+      <h3>Contact</h3>
+      <p>Questions: <strong>privacy@anonyLink.fun</strong></p>
+    </section>
+  </template>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // small runtime: set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
